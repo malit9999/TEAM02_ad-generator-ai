@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # =========================================================================
+  # 🌐 1. 기존 OpenAI 백엔드 서비스 (안전 구역, 실행 경로 교정 및 리로더 제거)
+  # =========================================================================
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    # 🎯 [핵심 패치] uvicorn이 올바른 패키지 위치에서 안전하게 작동하도록 수정하고, --reload를 완전히 제거합니다.
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./backend:/app/backend
+      - ./model:/app/model
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - ./model/.env
+
+  # =========================================================================
+  # 🖥️ 2. 신규 허깅페이스 로컬 백엔드 서비스 (독립 가동, 신규 포트 8001 및 GPU 맵핑)
+  #    💡 개발 완료 후 연동 시, 아래 주석(#)들을 싹 해제하시면 가동됩니다.
+  # =========================================================================
+  # backend-hf:
+  #   build: ./backend
+  #   ports:
+  #     - "8001:8001"
+  #   command: uvicorn backend.main_hf:app --host 0.0.0.0 --port 8001
+  #   volumes:
+  #     - ./backend:/app/backend
+  #     - ./model_hf:/app/model_hf
+  #     - ./model:/app/model
+  #   environment:
+  #     - PYTHONPATH=/app
+  #   env_file:
+  #     - ./model_hf/.env
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+
+  # =========================================================================
+  # 🎨 3. 기존 프론트엔드 서비스 (상황에 따라 주석 제어로 백엔드 동기화 스위칭)
+  # =========================================================================
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./backend:/app/backend
+      - ./model:/app/model
+      - ./model_hf:/app/model_hf
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+    depends_on:
+      - backend
+      # 🎯 [모델 스위칭 힌트] 신규 허깅페이스 모델로 전환할 때만 아래 주석을 풀어주세요!
+      # - backend-hf

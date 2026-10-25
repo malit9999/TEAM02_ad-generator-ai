@@ -58,8 +58,6 @@ flowchart LR
     end
     M1 --> OAI[("OpenAI API<br/>텍스트 · GPT-Image")]
     M2 --> OAI
-    M1 -.-> LF[("LangFuse<br/>선택")]
-    M2 -.-> LF
 ```
 
 `model/`과 `model_v2/`는 최상위 패키지 이름(`baseline` · `composer` · `geo`)이 겹쳐서 한 프로세스에 함께 올릴 수 없습니다.
@@ -106,7 +104,7 @@ flowchart LR
 | **창의성 1~5** | 낮을수록 원본 제품을 보존하고, 높을수록 자유롭게 재해석하도록 프롬프트를 조정합니다 |
 | **근거 없는 수치 경고** | 생성 문장에 입력에 없던 숫자가 나오면 경고를 붙입니다. JSON-LD에는 입력에 있는 필드만 넣습니다 |
 | **유료 생성 차단 스위치** | `MODEL_V2_PAID_ENABLED`가 정확히 `1`일 때만 생성 API가 열립니다. 아니면 요청 본문을 읽기 전에 503으로 막습니다 |
-| **선택적 관측** | LangFuse 키가 없으면 관측 코드가 아무것도 하지 않아, 관측 때문에 생성이 멈추지 않습니다. 프롬프트 원문 대신 모델명 · 지연 시간 · 재시도 횟수만 보냅니다 |
+| **선택적 관측** | 관측 도구 키가 없으면 관측 코드가 아무것도 하지 않아, 관측 때문에 생성이 멈추지 않습니다. 프롬프트 원문 대신 모델명 · 지연 시간 · 재시도 횟수만 보냅니다 |
 | **텍스트 LLM 교체 가능** | OpenAI 호환 엔드포인트로 호출해서 같은 코드로 OpenAI와 로컬 Ollama를 오갈 수 있습니다 |
 
 ---
@@ -200,7 +198,7 @@ python -m unittest tests.test_model_v2 tests.test_model_v2_isolation \
 | LLM 연결 | LangChain (`ChatOpenAI`) · Ollama (로컬 LLM 전환) |
 | 이미지 처리 | Pillow · rembg |
 | 서비스 | FastAPI · Uvicorn · Streamlit |
-| 관측 · 평가 | LangFuse · CLIP · BRISQUE |
+| 평가 | CLIP · BRISQUE |
 | 오픈소스 모델 경로 | Hugging Face Transformers · Diffusers (Qwen2.5-7B · FLUX.1-schnell) |
 | 테스트 | unittest · Streamlit AppTest |
 | 배포 | Docker · Docker Compose |
@@ -217,7 +215,7 @@ python -m unittest tests.test_model_v2 tests.test_model_v2_isolation \
 |------|------|
 | 서비스 뼈대 | FastAPI · Streamlit 기본 구조 |
 | **생성 모델** | `model/` · `model_v2/` 생성 파이프라인, v2 워커 통합, 테스트 |
-| 오픈소스 모델 · 평가 | Hugging Face 모델 경로, CLIP · BRISQUE 품질 평가, LangFuse 스코어 |
+| 오픈소스 모델 · 평가 | Hugging Face 모델 경로, CLIP · BRISQUE 품질 평가 |
 | 배포 | Docker · Docker Compose 구성 |
 
 **제가 맡은 부분은 생성 모델입니다.**
